@@ -25,7 +25,8 @@ static FETCHLINE LINES[]=
 		__osinfo,
 		"Linux",
 		{"#55FFFF","#000000",ANSI_S_UNDERLINE|ANSI_S_ITALIC},
-		4,2
+		4,
+		2
 	},
 
 	{"Hostname:",
@@ -34,7 +35,8 @@ static FETCHLINE LINES[]=
 		__hostname,
 		"",
 		{"#55FF55","#000000",ANSI_S_UNDERLINE|ANSI_S_ITALIC},
-		4,0
+		4,
+		0
 	},
 
 	{"Kernel:",
@@ -43,7 +45,8 @@ static FETCHLINE LINES[]=
 		__kernel,
 		"",
 		{"#AAAAAA","#000000",ANSI_S_UNDERLINE|ANSI_S_ITALIC},
-		4,0
+		4,
+		0
 	},
 
 	{"Uptime:",
@@ -52,7 +55,8 @@ static FETCHLINE LINES[]=
 		__uptime,
 		"",
 		{"#55FF55","#000000",ANSI_S_UNDERLINE|ANSI_S_ITALIC},
-		4,0
+		4,
+		0
 	},
 
 	{"Terminal:",
@@ -61,7 +65,8 @@ static FETCHLINE LINES[]=
 		__terminal,
 		"",
 		{"#FF55FF","#000000",ANSI_S_UNDERLINE|ANSI_S_ITALIC},
-		4,0
+		4,
+		0
 	},
 
 	{"CPU:",
@@ -70,7 +75,8 @@ static FETCHLINE LINES[]=
 		__cpu,
 		"",
 		{"#FF5555","#000000",ANSI_S_UNDERLINE|ANSI_S_ITALIC},
-		4,0
+		4,
+		0
 	},
 
 	{"Memory:",
@@ -79,7 +85,8 @@ static FETCHLINE LINES[]=
 		__memory,
 		"",
 		{"#55FF55","#000000",ANSI_S_UNDERLINE|ANSI_S_ITALIC},
-		4,0
+		4,
+		0
 	},
 };
 
