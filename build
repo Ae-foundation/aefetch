@@ -1,2 +1,0 @@
-cc aefetch.c -o aefetch -std=c89
-

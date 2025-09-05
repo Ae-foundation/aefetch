@@ -1,0 +1,172 @@
+#include "../config.h"
+
+/*
+ *	B E G I N
+ *
+ * start fetch: fill fetch data,
+ * and etc.
+ */
+inline static FETCH *BEGIN(void)
+{
+	FETCH *f;
+	if (!(f=calloc(1,sizeof(FETCH))))
+		return NULL;
+	memset(f,0,sizeof(FETCH));
+	setlocale(LC_ALL,"");
+	return f;
+}
+
+/*
+ *	C O N F I G
+ *
+ */
+inline static void CONFIG(FETCH *f)
+{
+	assert(f);
+	f->lines=LINES;
+	f->data.logo=LOGO;
+	f->data.linesn=sizeof(LINES)/sizeof(LINES[0]);
+	f->data.logon=sizeof(LOGO)/sizeof(LOGO[0]);
+}
+
+
+/*
+ * 	C O M P I L E
+ *
+ * main func
+ */
+inline static void COMPILE(FETCH *f)
+{
+	char	res[65535];
+	char	desc[2048];
+	char	val[4028];
+	char	tval[2048];
+	char	logo[2048];
+
+	char	bg[512];
+	char	fg[512];
+	char	s_on[64];
+	char	s_off[64];
+	char	skip[512];
+
+	size_t	n;
+	size_t	n1;
+	size_t	logon;
+	size_t	off;
+
+	assert(f);
+
+	for (n=off=0;n!=f->data.logon;n++)
+		if ((ansistrlen(f->data.logo[n]))>off)
+			off=ansistrlen(f->data.logo[n]);
+	off++;
+
+	for (n=logon=0;n<f->data.linesn;n++) {
+		if (f->lines[n].skip>0) {
+			for (n1=0;n1<f->lines[n].skip;n1++) {
+				if (logon!=f->data.logon) {
+					fprintf(stdout,"%s\n",f->data.logo[logon]);
+					++logon;
+				}
+				else
+					fprintf(stdout,"\n");
+			}
+		}
+
+		bzero(logo,sizeof(logo));
+		bzero(s_on,sizeof(s_on));
+		bzero(s_off,sizeof(s_off));
+		bzero(fg,sizeof(fg));
+		bzero(bg,sizeof(bg));
+		bzero(skip,sizeof(bg));
+
+		if (logon!=f->data.logon) {
+			snprintf(logo,sizeof(logo),"%s",f->data.logo[logon]);
+			++logon;
+		}
+
+		set_styleansi(s_on,sizeof(s_on),f->lines[n].style.style);
+		unset_styleansi(s_off,sizeof(s_off),f->lines[n].style.style);
+		hex2ansi(f->lines[n].style.fg,true,true,false,fg,sizeof(fg));
+		hex2ansi(f->lines[n].style.bg,false,true,false,bg,sizeof(bg));
+
+		n1=f->lines[n].space;
+		if (n1>=sizeof(skip))
+			n1=sizeof(skip)-1;
+		memset(skip,' ',n1);
+		skip[n1]='\0';
+
+		snprintf(desc,sizeof(desc),"%s%s%s%s%s%s%s",bg,fg,s_on,
+			(f->lines[n].desc)?f->lines[n].desc:"",
+			s_off,ANSI_RESET,skip);
+
+		bzero(s_on,sizeof(s_on));
+		bzero(s_off,sizeof(s_off));
+		bzero(fg,sizeof(fg));
+		bzero(bg,sizeof(bg));
+		bzero(tval,sizeof(bg));
+		bzero(val,sizeof(bg));
+		bzero(res,sizeof(res));
+		bzero(skip,sizeof(skip));
+
+		set_styleansi(s_on,sizeof(s_on),f->lines[n].styleval.style);
+		unset_styleansi(s_off,sizeof(s_off),f->lines[n].styleval.style);
+		hex2ansi(f->lines[n].styleval.fg,true,true,false,fg,sizeof(fg));
+		hex2ansi(f->lines[n].styleval.bg,false,true,false,bg,sizeof(bg));
+
+		if (f->lines[n].value)
+			f->lines[n].value(tval,sizeof(tval));
+		else {
+			if (f->lines[n].resvalue)
+				snprintf(tval,sizeof(tval),"%s",f->lines[n].resvalue);
+		}
+
+		snprintf(val,sizeof(val),"%s%s%s%s%s%s",bg,fg,s_on,
+			tval,s_off,ANSI_RESET);
+
+		if (off>ansistrlen(logo))
+			n1=off-ansistrlen(logo)-1;
+		n1+=f->lines[n].spacel;
+		if (n1>=sizeof(skip))
+			n1=sizeof(skip)-1;
+		memset(skip,' ',n1);
+		skip[n1]='\0';
+
+		snprintf(res,sizeof(res),"%s%s%s%s",logo,skip,desc,val);
+		fprintf(stdout,"%s\n",res);
+	}
+	while (logon!=f->data.logon) {
+		fprintf(stdout,"%s\n",f->data.logo[logon]);
+		++logon;
+	}
+}
+
+
+/*
+ * 	E N D
+ *
+ * main func
+ */
+inline static int END(FETCH* f)
+{
+	assert(f);
+	free(f);
+	return 0;
+}
+
+
+
+
+/*
+ * 	M A I N ()
+ *
+ * main func
+ */
+int main(int c, char **av)
+{
+	FETCH *f=BEGIN();
+	CONFIG(f);
+	COMPILE(f);
+	return END(f);
+}
+
