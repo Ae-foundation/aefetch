@@ -1,7 +1,6 @@
-cc -lm -O2 -g -Wall -c src/*.c
-cc -lm -O2 -g -Wall src/*.o -o ./aefetch
-rm *.o
-cp -rf aefetch src/aefetch
+cc -O2 -g -Wall -Iinclude -c src/*.c
+cc -O2 -g -Wall *.o -o aefetch -lm
+rm -f *.o
 ./aefetch
-rm aefetch
+mv -f aefetch src/aefetch
 
