@@ -39,6 +39,31 @@
 int
 __uptime(char *uptime, size_t n)
 {
+	assert(uptime);
+	assert(n);
+
+#ifdef __FreeBSD__
+	struct timeval	t;
+	size_t		siz;
+	int		mib[2];
+	double		res;
+	time_t		t1;
+
+	siz=sizeof(t);
+	mib[0]=CTL_KERN;
+	mib[1]=KERN_BOOTTIME;
+
+	if (sysctl(mib,2,&t,&siz,NULL,0)!=0)
+		return __ERR;
+
+	t1=time(NULL);
+	res=difftime(t1,t.tv_sec);
+
+	snprintf(uptime,n,"%d hours, %.1f minutes",
+		(int)res/3600,res/60.0);
+
+	return __OK;
+#else
 	FILE	*fp;
 	double	t;
 
@@ -55,5 +80,6 @@ __uptime(char *uptime, size_t n)
 		t/3600,fmod(t,3600)/60.0);
 
 	return __OK;
+#endif
 }
 

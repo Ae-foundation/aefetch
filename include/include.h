@@ -16,6 +16,12 @@
 #include <math.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <sys/time.h>
+#include <time.h>
+
+#ifdef __FreeBSD__
+#include <sys/sysctl.h>
+#endif
 
 #define ANSI_RESET "\x1b[0m"
 

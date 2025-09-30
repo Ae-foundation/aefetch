@@ -39,13 +39,39 @@
 int
 __cpu(char *cpu, size_t n)
 {
+	assert(n);
+	assert(cpu);
+
+#ifdef __FreeBSD__
+	int	mib[2];
+	char	model[256];
+	int	cores;
+	size_t	siz;
+
+	siz=sizeof(model);
+	mib[0]=CTL_HW;
+	mib[1]=HW_MODEL;
+
+	if (sysctl(mib,2,model,&siz,NULL,0)==-1)
+		return __ERR;
+	siz=strlen(model);
+	while (siz>0&&(model[siz-1]==' '||model[siz-1]=='\t'||model[siz-1]=='\n'))
+		model[--siz]='\0';
+
+	siz=sizeof(cores);
+	mib[0]=CTL_HW;
+	mib[1]=HW_NCPU;
+
+	if (sysctl(mib,2,&cores,&siz,NULL,0)==-1)
+		return __ERR;
+
+	snprintf(cpu,n,"%s (%d)",model,cores);
+	return __OK;
+#else
 	FILE	*fp;
 	char	line[256];
 	char	mbuf[256];
 	char	sbuf[256];
-
-	assert(n);
-	assert(cpu);
 
 	*mbuf=*sbuf='\0';
 	if (!(fp=fopen("/proc/cpuinfo","r")))
@@ -65,6 +91,8 @@ __cpu(char *cpu, size_t n)
 
 	fclose(fp);
 	snprintf(cpu,n,"%s (%s)",mbuf,sbuf);
+
 	return __OK;
+#endif
 }
 

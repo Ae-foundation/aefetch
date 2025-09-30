@@ -64,13 +64,41 @@ inline static const char *bytesfmt(size_t n)
 int
 __memory(char *mem, size_t n)
 {
+	assert(n);
+	assert(mem);
+
+#ifdef __FreeBSD__
+	long	free=0,inactive=0,cached=0;
+	u_long	total=0,used=0;
+	char	line[256];
+	size_t	len;
+
+	len=sizeof(total);
+	if (sysctlbyname("hw.physmem",&total,&len,NULL,0)!=0)
+		return __ERR;
+
+	len=sizeof(free);
+	if (sysctlbyname("vm.stats.vm.v_free_count",&free,&len,NULL,0)!=0)
+		return __ERR;
+
+	len=sizeof(inactive);
+	if (sysctlbyname("vm.stats.vm.v_inactive_count",&inactive,&len,NULL,0)!=0)
+		return __ERR;
+
+	len=sizeof(cached);
+	if (sysctlbyname("vm.stats.vm.v_cache_count",&cached,&len,NULL,0)!=0)
+		cached=0;
+
+	used=total-((u_long)(free+inactive+cached)*(u_long)getpagesize());
+	snprintf(line,sizeof(line),"%s",bytesfmt(used));
+	snprintf(mem,n,"%s / %s",line,bytesfmt(total));
+
+	return __OK;
+#else
 	FILE	*fp;
 	char	line[256];
 	u_long	tot,free,buff,
 		used,cached;
-
-	assert(n);
-	assert(mem);
 
 	if (!(fp=fopen("/proc/meminfo","r")))
 		return __ERR;
@@ -94,5 +122,7 @@ __memory(char *mem, size_t n)
 
 	snprintf(line,sizeof(line),"%s",bytesfmt(used));
 	snprintf(mem,n,"%s / %s",line,bytesfmt(tot));
+
 	return __OK;;
+#endif
 }
